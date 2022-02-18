@@ -6,4 +6,5 @@ Gave idea and my advice:
 https://github.com/tayfunerbilen/wordle-svelte-clone
  
 Sample Youtube Video: 
+
 [![Test](https://img.youtube.com/vi/pCcOPWuWxZ4/0.jpg)](https://youtu.be/pCcOPWuWxZ4)
