@@ -1,2 +1,8 @@
 # kelimeli
- android wordle game
+Android wordle game - kelimeli oyunu
+https://play.google.com/store/apps/details?id=b4a.kelimeli&hl=tr&gl=US
+
+Gave idea and my advice:
+https://github.com/tayfunerbilen/wordle-svelte-clone
+ 
+https://youtu.be/pCcOPWuWxZ4
