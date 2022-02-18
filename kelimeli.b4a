@@ -1,0 +1,795 @@
+﻿Build1=Default,b4a.kelimeli
+File1=4.csv
+File2=5.csv
+File3=6.csv
+File4=Layout.bal
+File5=scrabble.png
+FileGroup1=Default Group
+FileGroup2=Default Group
+FileGroup3=Default Group
+FileGroup4=Default Group
+FileGroup5=Default Group
+Group=Default Group
+Library1=core
+Library2=stringutils
+Library3=xui views
+Library4=xui
+ManifestCode='This code will be applied to the manifest file during compilation.~\n~'You do not need to modify it in most cases.~\n~'See this link for for more information: https://www.b4x.com/forum/showthread.php?p=78136~\n~AddManifestText(~\n~<uses-sdk android:minSdkVersion="14" android:targetSdkVersion="30"/>~\n~<supports-screens android:largeScreens="true" ~\n~    android:normalScreens="true" ~\n~    android:smallScreens="true" ~\n~    android:anyDensity="true"/>)~\n~SetApplicationAttribute(android:icon, "@drawable/icon")~\n~SetApplicationAttribute(android:label, "$LABEL$")~\n~CreateResourceFromFile(Macro, Themes.DarkTheme)~\n~RemovePermission(android.permission.INTERNET)~\n~'End of default text.~\n~
+Module1=Starter
+NumberOfFiles=5
+NumberOfLibraries=4
+NumberOfModules=1
+Version=11.2
+@EndOfDesignText@
+#Region  Project Attributes 
+	#ApplicationLabel: kelimeli
+	#VersionCode: 9
+	#VersionName: 9
+	'SupportedOrientations possible values: unspecified, landscape or portrait.
+	#SupportedOrientations: portrait
+	#CanInstallToExternalStorage: True
+	#BridgeLogger: True
+#End Region
+
+#Region  Activity Attributes 
+	#FullScreen: False
+	#IncludeTitle: False
+#End Region
+
+Sub Process_Globals
+	'These global variables will be declared once when the application starts.
+	'These variables can be accessed from all modules.
+	Private xui As XUI
+End Sub
+
+Sub Globals
+	'These global variables will be redeclared each time the activity is created.
+	Private yeniButton As Button
+	Private ilkPanel As Panel
+	Private oyunPaneli As Panel
+	Private RadioButton1 As RadioButton 'kolay - 4 harf
+	Private RadioButton2 As RadioButton 'normal - 5 harf
+	Private RadioButton3 As RadioButton 'zor - 6 harf
+	Private RadioButton4 As RadioButton 'pro - 6 harf, yardımsız
+	
+	Private Label1 As Label 'Harf 1
+	Private Label2 As Label 'Harf 2
+	Private Label3 As Label 'Harf 3
+	Private Label4 As Label 'Harf 4
+	Private Label5 As Label 'Harf 5
+	Private Label6 As Label 'Harf 6
+	Private girilenlerListView As ListView
+	Private LabelCevap As Label
+	Private harflerPanel As Panel
+	Private ButtonDelete As Button
+	Private ButtonEnter As Button
+	
+	
+	Private Button1 As Button
+	Private Button2 As Button
+	Private Button3 As Button
+	Private Button4 As Button
+	Private Button5 As Button
+	Private Button6 As Button
+	Private Button7 As Button
+	Private Button8 As Button
+	Private Button9 As Button
+	Private Button10 As Button
+	Private Button11 As Button
+	Private Button12 As Button
+	Private Button13 As Button
+	Private Button14 As Button
+	Private Button15 As Button
+	Private Button16 As Button
+	Private Button17 As Button
+	Private Button18 As Button
+	Private Button19 As Button
+	Private Button20 As Button
+	Private Button21 As Button
+	Private Button22 As Button
+	Private Button23 As Button
+	Private Button24 As Button
+	Private Button25 As Button
+	Private Button26 As Button
+	Private Button27 As Button
+	Private Button28 As Button
+	Private Button29 As Button
+	Private harfButtons(29) As Button
+	Private ButtonJoker As Button
+	
+	Private Table1, Table2, Table3 As List '3 kelime tablosu
+	Private jokerKelimeler As List
+	
+	Private sayac As Int = 1 		'hangi harfteyiz
+	Private arananKelime As String 	'ARANAN
+	Private oncekiKelimeler As List 'eskiler
+	Private yerHatali As Int = 0
+	Private yerDogru As Int = 0
+	
+	Private panelAnimSpeed As Int = 450
+	Dim baslangicZamani, bitisZamani As Long
+End Sub
+
+Sub Activity_Create(FirstTime As Boolean)
+	SetStartupThings
+	Activity.LoadLayout("Layout")
+	
+	harfButtons = Array As Button (Button1, Button2, Button3, Button4, Button5, Button6, Button7, Button8, Button9, Button10, Button11, Button12, Button13, Button14, Button15, Button16, Button17, Button18, Button19, Button20, Button21, Button22, Button23, Button24, Button25, Button26, Button27, Button28, Button29)
+	
+	yeniButton.Visible = True 'hemen tıklayamasın
+End Sub
+
+Sub Activity_Resume
+
+End Sub
+
+Sub Activity_Pause (UserClosed As Boolean)
+
+End Sub
+
+'YENİ OYUN
+Sub yeniButton_Click
+	ilkPanel.Visible = False
+	oyunPaneli.SetVisibleAnimated(panelAnimSpeed, True)
+	oyunPaneli.Visible = True
+	
+	'OYUN sıfırlama
+	Label1.Text = "_"
+	Label2.Text = "_"
+	Label3.Text = "_"
+	Label4.Text = "_"
+	Label5.Text = "_"
+	Label6.Text = "_"
+	
+	sayac = 1 			'imleç konumu
+	imlecGuncelle
+	
+	Label1.TextColor = Colors.Red
+	
+	Label1.Color = Colors.White
+	Label2.Color = Colors.White
+	Label3.Color = Colors.White
+	Label4.Color = Colors.White
+	Label5.Color = Colors.White
+	Label6.Color = Colors.White
+	Label1.Tag = ""
+	Label2.Tag = ""
+	Label3.Tag = ""
+	Label4.Tag = ""
+	Label5.Tag = ""
+	Label6.Tag = ""
+	oncekiKelimeler.initialize
+	oncekiKelimeler.Clear
+	
+	jokerKelimeler.Initialize
+	
+	Label5.Visible = True
+	Label6.Visible = True
+	
+	ButtonEnter.Enabled = True
+	ButtonJoker.Visible = True
+	LabelCevap.Visible = True
+	
+	girilenlerListView.Clear
+	girilenlerListView.SingleLineLayout.Label.TextSize = 26
+	girilenlerListView.SingleLineLayout.Label.TextColor = Colors.Black
+	girilenlerListView.SingleLineLayout.Label.Typeface = Typeface.MONOSPACE
+	
+	For i=0 To 28
+		harfButtons(i).Visible = True
+		harfButtons(i).Color = Colors.DarkGray
+		harfButtons(i).Width = 43dip
+		harfButtons(i).Height = 45dip
+	Next
+	
+	Dim selection() As String
+	
+	If RadioButton1.Checked Then
+		selection = Table1.Get(0)
+		Label5.Visible=False
+		Label6.Visible=False
+	else If RadioButton2.Checked Then
+		selection = Table2.Get(0)
+		Label6.Visible=False
+	else If RadioButton3.Checked Then
+		selection = Table3.Get(0)
+	else If RadioButton4.Checked Then
+		selection = Table3.Get(0)
+		LabelCevap.Visible = False
+		ButtonJoker.Visible = False
+	End If
+	
+	arananKelime= selection(Rnd(0, selection.Length-1))
+	
+	baslangicZamani = DateTime.Now
+End Sub
+
+'GERİ BASMA
+Sub Activity_KeyPress (KeyCode As Int) As Boolean
+	If KeyCode = KeyCodes.KEYCODE_BACK Then
+		If ilkPanel.Visible=False Then
+			ilkPanel.SetVisibleAnimated(panelAnimSpeed, True)
+			ilkPanel.Visible = True
+			oyunPaneli.Visible = False
+		Else
+			Activity.finish
+		End If
+		
+		Return True
+	Else
+		Return False
+	End If
+End Sub
+
+'HARF TIKLA
+Private Sub harfTikla_Click
+	'oyun bittiyse
+	If ButtonEnter.Enabled=False Then Return
+	
+	Dim B As Button = Sender
+	
+	If sayac >= arananKelime.Length Then
+		sayac = arananKelime.Length
+	End If
+	
+	If sayac <= 0 Then
+		sayac = 1
+	End If
+	
+	If sayac = 1 Then
+		If Label1.Tag<>"+"  Then Label1.Text = B.Text
+		sayac = 2
+	else If	sayac = 2 Then
+		If Label2.Tag<>"+"  Then Label2.Text = B.Text
+		sayac = 3
+	else If	sayac = 3 Then
+		If Label3.Tag<>"+"  Then Label3.Text = B.Text
+		sayac = 4
+	else If	sayac = 4 Then
+		If Label4.Tag<>"+"  Then Label4.Text = B.Text
+		If Label5.Visible Then sayac = 5 Else sayac=4
+	else If	sayac = 5 Then
+		If Label5.Tag<>"+"  Then Label5.Text = B.Text
+		If Label6.Visible Then sayac = 6 Else sayac=5
+	else If	sayac = 6 Then
+		If Label6.Tag<>"+"  Then Label6.Text = B.Text
+		sayac = 6
+	End If
+
+	imlecGuncelle
+End Sub
+
+Sub imlecGuncelle
+	Label1.TextColor = IIf(sayac=1, IIf(Label1.Tag="+",Colors.RGB(200,0,0),Colors.Red), Colors.Black)
+	Label2.TextColor = IIf(sayac=2, IIf(Label2.Tag="+",Colors.RGB(200,0,0),Colors.Red), Colors.Black)
+	Label3.TextColor = IIf(sayac=3, IIf(Label3.Tag="+",Colors.RGB(200,0,0),Colors.Red), Colors.Black)
+	Label4.TextColor = IIf(sayac=4, IIf(Label4.Tag="+",Colors.RGB(200,0,0),Colors.Red), Colors.Black)
+	Label5.TextColor = IIf(sayac=5, IIf(Label5.Tag="+",Colors.RGB(200,0,0),Colors.Red), Colors.Black)
+	Label6.TextColor = IIf(sayac=6, IIf(Label6.Tag="+",Colors.RGB(200,0,0),Colors.Red), Colors.Black)
+	
+	Dim girilen As String
+	
+	If RadioButton1.Checked Then
+		girilen = IIf(Label1.Text<>"_", Label1.Text, "[A-ZĞÜŞİÖÇ]")&IIf(Label2.Text<>"_", Label2.Text, "[A-ZĞÜŞİÖÇ]")&IIf(Label3.Text<>"_", Label3.Text, "[A-ZĞÜŞİÖÇ]")&IIf(Label4.Text<>"_", Label4.Text, "[A-ZĞÜŞİÖÇ]")
+	else If RadioButton2.Checked Then
+		girilen = IIf(Label1.Text<>"_", Label1.Text, "[A-ZĞÜŞİÖÇ]")&IIf(Label2.Text<>"_", Label2.Text, "[A-ZĞÜŞİÖÇ]")&IIf(Label3.Text<>"_", Label3.Text, "[A-ZĞÜŞİÖÇ]")&IIf(Label4.Text<>"_", Label4.Text, "[A-ZĞÜŞİÖÇ]")&IIf(Label5.Text<>"_", Label5.Text, "[A-ZĞÜŞİÖÇ]")
+	else If RadioButton3.Checked Or RadioButton4.Checked Then
+		girilen = IIf(Label1.Text<>"_", Label1.Text, "[A-ZĞÜŞİÖÇ]")&IIf(Label2.Text<>"_", Label2.Text, "[A-ZĞÜŞİÖÇ]")&IIf(Label3.Text<>"_", Label3.Text, "[A-ZĞÜŞİÖÇ]")&IIf(Label4.Text<>"_", Label4.Text, "[A-ZĞÜŞİÖÇ]")&IIf(Label5.Text<>"_", Label5.Text, "[A-ZĞÜŞİÖÇ]")&IIf(Label6.Text<>"_", Label6.Text, "[A-ZĞÜŞİÖÇ]")
+	End If
+	
+	
+	LabelCevap.Text = kelimeSayisi(girilen) & " kelime var"
+End Sub
+
+Sub kelimeSayisi(gelen As String) As Int
+	Dim selection() As String
+	
+	If RadioButton1.Checked Then
+		selection = Table1.Get(0)
+	Else If RadioButton2.Checked Then
+		selection = Table2.Get(0)
+	Else If RadioButton3.Checked Or RadioButton4.Checked Then
+		selection = Table3.Get(0)
+	End If
+	
+	jokerKelimeler.Initialize
+	jokerKelimeler.Clear
+	
+	'https://asilbalaban.github.io/wordle-tr-helper/
+	
+	For i =0  To selection.Length-1
+		If Regex.IsMatch(gelen, selection(i)) Then
+			jokerKelimeler.Add(selection(i))
+		End If
+	Next
+	
+	Return jokerKelimeler.Size
+End Sub
+
+Private Sub ButtonEnter_Click
+	Dim girilen As String
+	
+	girilen = IIf(Label1.Text<>"_", Label1.Text, "")&IIf(Label2.Text<>"_", Label2.Text, "")&IIf(Label3.Text<>"_", Label3.Text, "")&IIf(Label4.Text<>"_", Label4.Text, "")&IIf(Label5.Text<>"_", Label5.Text, "")&IIf(Label6.Text<>"_", Label6.Text, "")
+	
+	If girilen.Length = arananKelime.Length And girilenVarMi(girilen) And girilenListedeVarMi(girilen)=False Then
+		harfleriKontrolEt
+		If girilen = arananKelime Then
+			
+			Dim cs As CSBuilder
+			cs.Initialize.Color(Colors.Green).Append(girilen).PopAll
+			
+			girilenlerListView.AddSingleLine(cs)
+			ButtonEnter.Enabled = False
+			
+			bitisZamani = DateTime.Now
+			
+			Dim fark As Period
+			fark = DateUtils.PeriodBetweenInDays(baslangicZamani, bitisZamani)
+			
+			Dim basari As String
+			If girilenlerListView.Size < 5 Then
+				basari = "Muhteşemsiniz 🥇"
+			Else If girilenlerListView.Size >= 5 And girilenlerListView.Size <= 8  Then
+				basari = "İyisiniz 🥈"
+			Else
+				basari = "Daha iyi olabilirsiniz 🥉"
+			End If
+			
+			xui.MsgboxAsync(arananKelime &" kelimesini" & CRLF & girilenlerListView.Size &  ". denemede bildiniz!" &CRLF&CRLF & basari &CRLF& fark.Minutes & " dakika " & fark.Seconds & " saniye" , "kelimeli")
+		Else
+			oncekiKelimeler.Add(girilen)
+			
+			Dim cs As CSBuilder
+			cs.Initialize()
+			
+			If Label1.Tag="" Then cs.Color(Colors.Black).Append(Label1.Text).Pop
+			If Label1.Tag="-" Then cs.Color(Colors.Yellow).Append(Label1.Text).Pop
+			If Label1.Tag="+" Then cs.Color(Colors.Green).Append(Label1.Text).Pop
+			If Label2.Tag="" Then cs.Color(Colors.Black).Append(Label2.Text).Pop
+			If Label2.Tag="-" Then cs.Color(Colors.Yellow).Append(Label2.Text).Pop
+			If Label2.Tag="+" Then cs.Color(Colors.Green).Append(Label2.Text).Pop
+			If Label3.Tag="" Then cs.Color(Colors.Black).Append(Label3.Text).Pop
+			If Label3.Tag="-" Then cs.Color(Colors.Yellow).Append(Label3.Text).Pop
+			If Label3.Tag="+" Then cs.Color(Colors.Green).Append(Label3.Text).Pop
+			If Label4.Tag="" Then cs.Color(Colors.Black).Append(Label4.Text).Pop
+			If Label4.Tag="-" Then cs.Color(Colors.Yellow).Append(Label4.Text).Pop
+			If Label4.Tag="+" Then cs.Color(Colors.Green).Append(Label4.Text).Pop
+			If Label5.Tag="" And Label5.Visible Then cs.Color(Colors.Black).Append(Label5.Text).Pop
+			If Label5.Tag="-" And Label5.Visible Then cs.Color(Colors.Yellow).Append(Label5.Text).Pop
+			If Label5.Tag="+" And Label5.Visible Then cs.Color(Colors.Green).Append(Label5.Text).Pop
+			If Label6.Tag="" And Label6.Visible Then cs.Color(Colors.Black).Append(Label6.Text).Pop
+			If Label6.Tag="-" And Label6.Visible Then cs.Color(Colors.Yellow).Append(Label6.Text).Pop
+			If Label6.Tag="+" And Label6.Visible Then cs.Color(Colors.Green).Append(Label6.Text).Pop
+			
+			girilenlerListView.AddSingleLine(cs )
+		End If
+	Else
+		ShakeView(harflerPanel, 150)
+		ToastMessageShow("Kelime yok, kısa veya zaten girildi...", False)
+	End If
+End Sub
+
+'GERİ SİL
+Private Sub ButtonDelete_Click
+	'oyun bittiyse
+	If ButtonEnter.Enabled=False Then Return
+	
+	If sayac = 1 Then
+		sayac = 1
+		If Label1.Tag <> "+" Then
+			Label1.Text = "_"
+			Label1.Color = Colors.White
+		End If
+	Else If	sayac = 2 Then
+		sayac = 1
+		If Label2.Text = "_" Or Label2.Tag = "+" Then
+			If Label1.Tag <> "+" Then
+				Label1.Text = "_"
+				Label1.Color = Colors.White
+			End If
+		End If
+	Else If	sayac = 3 Then
+		sayac = 2
+		If Label3.Text = "_" Or Label3.Tag = "+" Then
+			If Label2.Tag <> "+" Then
+				Label2.Text = "_"
+				Label2.Color = Colors.White
+			End If
+		End If
+	Else If	sayac = 4 Then
+		If Label4.Text = "_" Or Label4.Tag = "+" Then
+			If Label3.Tag <> "+" Then
+				Label3.Text = "_"
+				Label3.Color = Colors.White
+			End If
+			sayac = 3
+		Else If arananKelime.Length=4 And Label4.Tag <> "+" Then
+			Label4.Text = "_"
+			Label4.Color = Colors.White
+			sayac = 4
+		End If
+	Else If	sayac = 5 Then
+		If Label5.Text = "_" Or Label5.Tag = "+" Then
+			If Label4.Tag <> "+" Then
+				Label4.Text = "_"
+				Label4.Color = Colors.White
+			End If
+			sayac = 4
+		Else If arananKelime.Length=5 And Label5.Tag <> "+" Then
+			Label5.Text = "_"
+			Label5.Color = Colors.White
+			sayac = 5
+		End If
+	Else If	sayac = 6 Then
+		If Label6.Text = "_" Or Label6.Tag = "+" Then
+			If Label5.Tag <> "+" Then
+				Label5.Text = "_"
+				Label5.Color = Colors.White
+			End If
+			sayac = 5
+		Else If arananKelime.Length=6 And Label6.Tag <> "+" Then
+			Label6.Text = "_"
+			Label6.Color = Colors.White
+			sayac = 6
+		End If
+	End If
+	
+	imlecGuncelle
+End Sub
+
+Sub harfleriKontrolEt
+	
+	Dim eksilen As String = arananKelime
+	yerHatali = 0
+	yerDogru = 0
+	
+	'yeri tutanlar
+	If Label1.Text = arananKelime.CharAt(0) Then
+		eksilen = "."&arananKelime.SubString(1) 'ilk harf iptal
+	End If
+	If Label2.Text = arananKelime.CharAt(1) Then
+		eksilen = eksilen.SubString2(0,1)&"."&arananKelime.SubString(2)
+	End If
+	If Label3.Text = arananKelime.CharAt(2) Then
+		eksilen = eksilen.SubString2(0,2)&"."&arananKelime.SubString(3)
+	End If
+	If Label4.Text = arananKelime.CharAt(3) Then
+		eksilen = eksilen.SubString2(0,3)&"."&arananKelime.SubString(4)
+	End If
+	If Label5.Visible And Label5.Text = arananKelime.CharAt(4) Then
+		eksilen = eksilen.SubString2(0,4)&"."&arananKelime.SubString(5)
+	End If
+	If Label6.Visible And Label6.Text = arananKelime.CharAt(5) Then
+		eksilen = eksilen.SubString2(0,5)&"."&arananKelime.SubString(6)
+	End If
+	
+	'yeri hatalı olanlar
+	If eksilen.IndexOf(Label1.Text)>-1 Then
+		yerHatali = yerHatali + 1
+		Label1.Color = Colors.Yellow
+		Label1.Tag = "-"
+	Else
+		Label1.Tag = ""
+	End If
+	If eksilen.IndexOf(Label2.Text)>-1 Then
+		yerHatali = yerHatali + 1
+		Label2.Color = Colors.Yellow
+		Label2.Tag = "-"
+	Else
+		Label2.Tag = ""
+	End If
+	If eksilen.IndexOf(Label3.Text)>-1 Then
+		yerHatali = yerHatali + 1
+		Label3.Color = Colors.Yellow
+		Label3.Tag = "-"
+	Else
+		Label3.Tag = ""
+	End If
+	If eksilen.IndexOf(Label4.Text)>-1 Then
+		yerHatali = yerHatali + 1
+		Label4.Color = Colors.Yellow
+		Label4.Tag = "-"
+	Else
+		Label4.Tag = ""
+	End If
+	If Label5.Visible And eksilen.IndexOf(Label5.Text)>-1 Then
+		yerHatali = yerHatali + 1
+		Label5.Color = Colors.Yellow
+		Label5.Tag = "-"
+	Else
+		Label5.Tag = ""
+	End If
+	If Label6.Visible And eksilen.IndexOf(Label6.Text)>-1 Then
+		yerHatali = yerHatali + 1
+		Label6.Color = Colors.Yellow
+		Label6.Tag = "-"
+	Else
+		Label6.Tag = ""
+	End If
+	
+	If Label1.Text = arananKelime.CharAt(0) Then
+		yerDogru = yerDogru + 1
+		Label1.Color = Colors.Green
+		Label1.Tag = "+"
+	End If
+	If Label2.Text = arananKelime.CharAt(1) Then
+		yerDogru = yerDogru + 1
+		Label2.Color = Colors.Green
+		Label2.Tag = "+"
+	End If
+	If Label3.Text = arananKelime.CharAt(2) Then
+		yerDogru = yerDogru + 1
+		Label3.Color = Colors.Green
+		Label3.Tag = "+"
+	End If
+	If Label4.Text = arananKelime.CharAt(3) Then
+		yerDogru = yerDogru + 1
+		Label4.Color = Colors.Green
+		Label4.Tag = "+"
+	End If
+	If Label5.Visible And Label5.Text = arananKelime.CharAt(4) Then
+		yerDogru = yerDogru + 1
+		Label5.Color = Colors.Green
+		Label5.Tag = "+"
+	End If
+	If Label6.Visible And Label6.Text = arananKelime.CharAt(5) Then
+		yerDogru = yerDogru + 1
+		Label6.Color = Colors.Green
+		Label6.Tag = "+"
+	End If
+	
+	If Label1.Tag == "" Then
+		dugmeyiBulveGizle(Label1.Text)
+	End If
+	If Label2.Tag == "" Then
+		dugmeyiBulveGizle(Label2.Text)
+	End If
+	If Label3.Tag == "" Then
+		dugmeyiBulveGizle(Label3.Text)
+	End If
+	If Label4.Tag == "" Then
+		dugmeyiBulveGizle(Label4.Text)
+	End If
+	If Label5.Tag == "" Then
+		dugmeyiBulveGizle(Label5.Text)
+	End If
+	If Label6.Tag == "" Then
+		dugmeyiBulveGizle(Label6.Text)
+	End If
+	
+	If Label1.Tag <> "" Then
+		dugmeyiBulveRenkle(Label1.Text, Label1.Tag)
+	End If
+	If Label2.Tag <> "" Then
+		dugmeyiBulveRenkle(Label2.Text, Label2.Tag)
+	End If
+	If Label3.Tag <> "" Then
+		dugmeyiBulveRenkle(Label3.Text, Label3.Tag)
+	End If
+	If Label4.Tag <> "" Then
+		dugmeyiBulveRenkle(Label4.Text, Label4.Tag)
+	End If
+	If Label5.Tag <> "" Then
+		dugmeyiBulveRenkle(Label5.Text, Label5.Tag)
+	End If
+	If Label6.Tag <> "" Then
+		dugmeyiBulveRenkle(Label6.Text, Label6.Tag)
+	End If
+	
+End Sub
+
+Sub dugmeyiBulveGizle(gelen As String)
+	For i = 0 To 28
+		If gelen = harfButtons(i).Text Then harfButtons(i).Color = Colors.Gray
+	Next
+End Sub
+
+Sub dugmeyiBulveRenkle(gelen As String, durum As String)
+	For i = 0 To 28
+		If gelen = harfButtons(i).Text Then
+			If durum == "+" Then
+				harfButtons(i).Color = Colors.RGB(0,200,0) 'koyu yeşil
+			End If
+		End If
+	Next
+End Sub
+
+Sub ShakeView (View As B4XView, Duration As Int)
+	Dim Left As Int = View.Left
+	Dim Delta As Int = 20dip
+	For i = 1 To 4
+		View.SetLayoutAnimated(Duration / 5, Left + Delta, View.Top, View.Width, View.Height)
+		Delta = -Delta
+		Sleep(Duration / 5)
+	Next
+	View.SetLayoutAnimated(Duration/5, Left, View.Top, View.Width, View.Height)
+End Sub
+
+Sub SetStartupThings
+	Dim jo As JavaObject
+	jo.InitializeStatic("java.util.Locale")
+	jo.RunMethod("setDefault",  Array As Object(jo.GetField("US")))
+	
+	Dim su As StringUtils
+	Table1 = su.LoadCSV(File.DirAssets, "4.csv", ";")
+	Table2 = su.LoadCSV(File.DirAssets, "5.csv", ";")
+	Table3 = su.LoadCSV(File.DirAssets, "6.csv", ";")	
+End Sub
+
+Sub girilenListedeVarMi(gelen As String) As Boolean
+	Dim sonuc As Boolean = False
+	For Each eleman In oncekiKelimeler
+		If eleman = gelen Then
+			sonuc = True
+			Exit
+		End If
+	Next
+	Return sonuc
+End Sub
+
+Sub girilenVarMi(gelen As String) As Boolean
+	Dim selection() As String
+	Dim sonuc As Boolean = False
+	
+	If RadioButton1.Checked Then
+		selection = Table1.Get(0)
+	else If RadioButton2.Checked Then
+		selection = Table2.Get(0)
+	else If RadioButton3.Checked Or RadioButton4.Checked Then
+		selection = Table3.Get(0)
+	End If
+	
+	For Each eleman In selection
+		If eleman = gelen Then
+			sonuc = True
+			Exit
+		End If
+	Next
+	Return sonuc
+End Sub
+
+Private Sub ButtonGeri_Click
+	oyunPaneli.Visible = False
+	ilkPanel.SetVisibleAnimated(panelAnimSpeed, True)
+	ilkPanel.Visible = True
+End Sub
+
+public Sub CountString(SearchMe As String, FindMe As String) As Int
+	Dim NumFound As Int = 0
+	Dim P As Int = SearchMe.IndexOf(FindMe)
+	Do Until P < 0    'IndexOf functions return -1 if not found
+		NumFound = NumFound + 1
+		P = SearchMe.IndexOf2(FindMe, P + 1)    'continue search at next char after previous occurrence
+	Loop
+	Return NumFound
+End Sub
+
+Private Sub Label6_Click
+	sayac = 6
+	If Label6.Tag <> "+" Then
+		Label6.Text = "_"
+		Label6.Color = Colors.White
+		Label6.TextColor = Colors.Red
+	End If
+	imlecGuncelle
+End Sub
+
+Private Sub Label5_Click
+	sayac = 5
+	If Label5.Tag <> "+" Then
+		Label5.Text = "_"
+		Label5.Color = Colors.White
+		Label5.TextColor = Colors.Red
+	End If
+	imlecGuncelle
+End Sub
+
+Private Sub Label4_Click
+	sayac = 4
+	If Label4.Tag <> "+" Then
+		Label4.Text = "_"
+		Label4.Color = Colors.White
+		Label4.TextColor = Colors.Red
+	End If
+	imlecGuncelle
+End Sub
+
+Private Sub Label3_Click
+	sayac = 3
+	If Label3.Tag <> "+" Then
+		Label3.Text = "_"
+		Label3.Color = Colors.White
+		Label3.TextColor = Colors.Red
+	End If
+	imlecGuncelle
+End Sub
+
+Private Sub Label2_Click
+	sayac = 2
+	If Label2.Tag <> "+" Then
+		Label2.Text = "_"
+		Label2.Color = Colors.White
+		Label2.TextColor = Colors.Red
+	End If
+	imlecGuncelle
+End Sub
+
+Private Sub Label1_Click
+	sayac = 1
+	If Label1.Tag <> "+" Then
+		Label1.Text = "_"
+		Label1.Color = Colors.White
+		Label1.TextColor = Colors.Red
+	End If
+	imlecGuncelle
+End Sub
+
+Private Sub harflerPanel_Click
+	sayac = 1
+	If Label1.Tag <> "+" Then
+		Label1.Text = "_"
+		Label1.Color = Colors.White
+		Label1.TextColor = Colors.Red
+	End If
+	If Label2.Tag <> "+" Then
+		Label2.Text = "_"
+		Label2.Color = Colors.White
+		Label2.TextColor = Colors.Red
+	End If
+	If Label3.Tag <> "+" Then
+		Label3.Text = "_"
+		Label3.Color = Colors.White
+		Label3.TextColor = Colors.Red
+	End If
+	If Label4.Tag <> "+" Then
+		Label4.Text = "_"
+		Label4.Color = Colors.White
+		Label4.TextColor = Colors.Red
+	End If
+	If Label5.Tag <> "+" Then
+		Label5.Text = "_"
+		Label5.Color = Colors.White
+		Label5.TextColor = Colors.Red
+	End If
+	If Label6.Tag <> "+" Then
+		Label6.Text = "_"
+		Label6.Color = Colors.White
+		Label6.TextColor = Colors.Red
+	End If
+	imlecGuncelle
+End Sub
+
+Private Sub ButtonJoker_Click
+	'oyun bittiyse
+	If ButtonEnter.Enabled=False Then Return
+	
+	If	jokerKelimeler.Size>0 Then
+		Dim rasgele As Int
+		
+		If jokerKelimeler.Size = 1 Then
+			rasgele = 0
+		Else
+			rasgele = Rnd(0,jokerKelimeler.Size-1)
+		End If
+		
+		Dim gelen As String = jokerKelimeler.Get(rasgele)
+		Dim girilen As String
+	
+		girilen = IIf(Label1.Text<>"_", Label1.Text, "")&IIf(Label2.Text<>"_", Label2.Text, "")&IIf(Label3.Text<>"_", Label3.Text, "")&IIf(Label4.Text<>"_", Label4.Text, "")&IIf(Label5.Text<>"_", Label5.Text, "")&IIf(Label6.Text<>"_", Label6.Text, "")
+		If gelen <> girilen Then
+			Label1.Text = gelen.CharAt(0)
+			Label2.Text = gelen.CharAt(1)
+			Label3.Text = gelen.CharAt(2)
+			Label4.Text = gelen.CharAt(3)
+			Label5.Text = IIf(Label5.Visible, gelen.CharAt(4), "")
+			Label6.Text = IIf(Label6.Visible, gelen.CharAt(5), "")
+			If RadioButton1.Checked=False Then ButtonJoker.Visible = False 'kolay oyunda joker kaybolmasın
+			ToastMessageShow("Joker Kullandınız!", False)
+		Else
+			ToastMessageShow("Joker Kullanılamadı...", False)
+		End If
+	Else
+		ToastMessageShow("Joker Kullanılamadı...", False)
+	End If
+	
+End Sub
